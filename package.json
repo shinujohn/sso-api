@@ -1,0 +1,20 @@
+{
+    "name": "osc-api",
+    "version": "0.0.0",
+    "description": "api",
+    "main": "server.js",
+    "author": {
+        "name": "oscdev",
+        "email": ""
+    },
+    "dependencies": {
+        "express": "*",
+        "express-session": "*",
+        "cookie-parser": "*",
+        "adal-node": "*",
+        "q": "*",
+        "crypto": "*",
+        "path": "*",
+        "fs": "*"
+    }
+}

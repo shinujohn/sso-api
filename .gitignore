@@ -26,3 +26,11 @@ node_modules
 
 # Users Environment Variables
 .lock-wscript
+
+# Visual studio files
+/bin
+/obj
+*.njsproj
+*.dat
+*.dat.tmp
+*.suo
