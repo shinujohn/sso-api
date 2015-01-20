@@ -71,6 +71,20 @@ server.get('/auth/login', function (req, res) {
     
 });
 
+
+/*
+ * Logout request handler 
+ */
+server.get('/auth/logout', function (req, res) {
+    req.session.destroy(function (err) {
+        console.error(err);
+    });
+
+    res.clearCookie('auth');
+    res.clearCookie('state');
+    res.redirect(process.env.webUrl || config.webUrl);
+});
+
 /*
  * Handler to recieve the token from Azure AD once successfully authenticated
  */
