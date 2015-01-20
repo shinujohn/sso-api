@@ -5,7 +5,7 @@ var crypto = require('crypto');
 var fs = require("fs");
 
 var ProxySecurity = function () {
-    
+        
     /*
     * General configuration
     */

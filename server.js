@@ -83,7 +83,7 @@ server.get('/auth/token', function (req, res) {
     
     proxySecurity.getAccessToken(req.query.code).then(function (accessToken) {
         res.cookie('auth', accessToken);
-        res.redirect((process.env.webUrl || config.webUrl) + '/auth?token=' + encodeURIComponent(accessToken));
+        res.redirect((process.env.webUrl || config.webUrl));
     }).catch(function (err) {
         res.send(err);
     });
