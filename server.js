@@ -5,6 +5,8 @@ var adal = require('adal-node');
 var crypto = require('crypto');
 var path = require('path');
 var proxySecurity = require('./ProxySecurity');
+var expressJwt = require('express-jwt');
+var jwt = require('jsonwebtoken');
 
 /*
  * General configuration
@@ -37,10 +39,12 @@ server.use(function crossOrigin(req, res, next) {
     res.header("Access-Control-Allow-Origin", (process.env.webUrl || config.webUrl));
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, oscauth, Cache-Control');
+    res.header('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept, oscauth, Cache-Control');
     
     return next();
 });
+var secret = "cantguessme";
+
 
 /*
  * Azure AD login
@@ -79,7 +83,7 @@ server.get('/auth/logout', function (req, res) {
     req.session.destroy(function (err) {
         console.error(err);
     });
-
+    
     res.clearCookie('auth');
     res.clearCookie('state');
     res.redirect(process.env.webUrl || config.webUrl);
@@ -97,6 +101,7 @@ server.get('/auth/token', function (req, res) {
     
     proxySecurity.getAccessToken(req.query.code).then(function (accessToken) {
         res.cookie('auth', accessToken);
+        
         res.redirect((process.env.webUrl || config.webUrl));
     }).catch(function (err) {
         res.send(err);
@@ -105,14 +110,18 @@ server.get('/auth/token', function (req, res) {
 });
 
 /*
- * Middleware to validate user context/authentication status
+ * Authorization
  */
-server.use(function (req, res, next) {
-    if (req.cookies.auth && proxySecurity.validateToken(req.cookies.auth)) {
+server.use('/api',
+  expressJwt({ secret: secret }),
+  function (req, res, next) {
+    if (req.method === 'OPTIONS') {
+        return next();
+    } else if (req.user != null || typeof (req.user) != 'undefined') {
         next();
-    }
-    else {
-        res.redirect('/auth/login');
+    } else {
+        res.send(401);
+        res.end();
     }
 });
 
@@ -120,15 +129,10 @@ server.use(function (req, res, next) {
  * Returns information about the current user
  */
 server.get('/api/user', function (req, res) {
-    res.send(parseBase64String(req.cookies.auth.split('.')[0]));
+    res.send((req.user));
 });
 
 server.listen(process.env.port || 8788, function () {
     console.log('API started');
 });
 
-
-// private utility
-function parseBase64String(sourceString) {
-    return (new Buffer(sourceString, 'base64')).toString('ascii');
-}
